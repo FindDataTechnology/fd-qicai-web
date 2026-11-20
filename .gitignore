@@ -1,0 +1,9 @@
+# 构建产物与本地状态（对齐 fd-bench-web / fd-marketing-web 先例）
+dist/
+.astro/
+node_modules/
+.DS_Store
+
+# 本机 dev 端点（不写进仓：本仓公开，内网拓扑不入库）
+.env
+.env.local

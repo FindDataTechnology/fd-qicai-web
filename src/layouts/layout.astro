@@ -1,0 +1,31 @@
+---
+// 启材线官网骨架（Persuade 单页）。字体本地子集化（@fontsource），不依赖 Google Fonts。
+import "@fontsource/noto-serif-sc/400.css";
+import "@fontsource/noto-serif-sc/700.css";
+import "@fontsource/noto-sans-sc/400.css";
+import "@fontsource/noto-sans-sc/500.css";
+import "../styles/global.css";
+
+const { title = "启材 · 判过许可的教育素材目录" } = Astro.props;
+const desc =
+  "启材是寻数旗下教育线的可信素材目录：每一条都判过许可、带可回访来源与采集时间；人和智能体读同一本目录。";
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta property="og:image" content="https://qicai.finddatatech.cloud/og.png">
+    <meta name="description" content={desc} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://qicai.finddatatech.cloud/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

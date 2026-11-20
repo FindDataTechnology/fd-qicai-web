@@ -1,0 +1,268 @@
+/* 启材线官网 · 编目卡抽屉世界（.impeccable/surfaces/qicai-site.md 方向契约）
+   材质=牛皮卡纸 + 墨黑 + 许可色标骑缝条 + 红骑缝章；display=Noto Serif SC，
+   body=Noto Sans SC，机器读栏=JetBrains Mono。浏览器面（选区/caret/滚动条/focus/
+   下划线偏移/tabular-nums）全随这套色主题化。 */
+
+:root {
+  --paper: #EDE3CF;
+  --paper-edge: #E2D5BB;
+  --ink: #211D1A;
+  --ink-soft: #4A423A;
+  --rule: #C9B994;
+  --seal-red: #A6322B;
+
+  --lic-cc0: #3E6B4F;
+  --lic-ccby: #2B4B6F;
+  --lic-nc: #B5732A;
+  --lic-meta: #5A5652;
+  --lic-audio: #6B4C7A;
+
+  --display: "Noto Serif SC", serif;
+  --body: "Noto Sans SC", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #201C17;
+    --paper-edge: #2A251E;
+    --ink: #EDE3CF;
+    --ink-soft: #C9BFA8;
+    --rule: #4A423A;
+    --lic-cc0: #7FB093;
+    --lic-ccby: #8FB2D4;
+    --lic-nc: #D9A05B;
+    --lic-meta: #A8A29A;
+    --lic-audio: #B394C4;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--ink); color: var(--paper); }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+/* 牛皮纸纹理：只从「卡片目录柜」这一主体世界取，无网格/斜纹装饰 */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(0,0,0,0.05), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.35), transparent 40%);
+  mix-blend-mode: multiply;
+}
+@media (prefers-color-scheme: dark) {
+  body::before { mix-blend-mode: screen; opacity: 0.5; }
+}
+
+main { max-width: 1180px; margin: 0 auto; padding: 0 24px 96px; }
+
+/* ── 首屏 ── */
+.hero { padding: 88px 0 40px; }
+.hero h1 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 5.2vw, 4rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0 0 20px;
+  text-wrap: balance;
+  max-width: 22ch;
+}
+.hero .lede {
+  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  color: var(--ink-soft);
+  max-width: 58ch;
+  margin: 0;
+}
+
+/* ── 双译本承重墙 ── */
+.dual {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  margin: 56px 0 0;
+}
+@media (max-width: 860px) { .dual { grid-template-columns: 1fr; } }
+
+.panel-label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+
+/* 编目卡 */
+.card {
+  position: relative;
+  background: var(--paper-edge);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 26px 26px 30px;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 10px 28px -18px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+.card .title {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  line-height: 1.3;
+  font-weight: 700;
+  margin: 0 0 6px;
+  text-wrap: balance;
+}
+.card .creator { color: var(--ink-soft); margin: 0 0 18px; font-size: 0.95rem; }
+.card dl {
+  display: grid; grid-template-columns: 5.5em 1fr; gap: 8px 14px;
+  margin: 0; font-size: 0.9rem;
+}
+.card dt { color: var(--ink-soft); }
+.card dd { margin: 0; overflow-wrap: anywhere; }
+.card dd a { color: var(--ink); text-underline-offset: 3px; }
+
+/* 许可色标骑缝条 */
+.tab {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 8px;
+}
+.tab[data-layer="cc0_pd"] { background: var(--lic-cc0); }
+.tab[data-layer="oa_cc_by"] { background: var(--lic-ccby); }
+.tab[data-layer="cc-by-nc"] { background: var(--lic-nc); }
+.tab[data-layer="metadata_only"] { background: var(--lic-meta); }
+.tab[data-layer="public-enclosure"] { background: var(--lic-audio); }
+
+.lic {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--mono); font-size: 0.78rem;
+}
+.lic::before {
+  content: ""; width: 9px; height: 9px; border-radius: 2px;
+  background: var(--sw, var(--ink));
+}
+
+/* 禁商用红骑缝章 */
+.seal {
+  position: absolute; right: 18px; bottom: 14px;
+  font-family: var(--display); font-weight: 700;
+  color: var(--seal-red);
+  border: 2px dashed var(--seal-red);
+  border-radius: 8px;
+  padding: 4px 10px;
+  transform: rotate(-8deg);
+  font-size: 0.9rem;
+  opacity: 0.92;
+}
+
+/* 机器读记录 */
+.record {
+  background: #1A1712;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 22px 24px;
+  overflow: auto;
+  max-height: 380px;
+}
+.record pre {
+  margin: 0; font-family: var(--mono);
+  font-size: 0.82rem; line-height: 1.75;
+  color: #D8CFBB; font-variant-numeric: tabular-nums;
+}
+.record .k { color: #8FB2D4; }
+.record .s { color: #A8C9A0; }
+.record .b { color: #D9A05B; }
+.record .n { color: #B394C4; }
+.record .line { display: block; }
+.record .line.hl {
+  background: rgba(214,160,91,0.18);
+  box-shadow: inset 3px 0 0 var(--lic-nc);
+}
+
+/* 卡上字段可点 → 右栏同步亮 */
+[data-field] { cursor: pointer; }
+[data-field]:hover, [data-field].active { text-decoration: underline; text-underline-offset: 3px; }
+
+/* 状态：加载 / 错误（如实降级） */
+.status {
+  font-family: var(--mono); font-size: 0.85rem;
+  color: var(--ink-soft); padding: 18px 0;
+}
+.status.error { color: var(--seal-red); }
+
+/* ── 实时概况带 ── */
+.overview {
+  margin-top: 72px;
+  border-top: 1px solid var(--rule);
+  padding-top: 36px;
+}
+.overview h2 {
+  font-family: var(--display); font-size: 1.35rem; margin: 0 0 4px; font-weight: 700;
+}
+.overview .asof { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-soft); }
+.stats {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px;
+}
+.stat {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--rule); border-radius: 999px;
+  padding: 7px 14px; font-size: 0.85rem;
+  background: var(--paper-edge);
+}
+.stat b { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 500; }
+
+/* ── 两扇门 ── */
+.doors {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+  margin-top: 72px;
+}
+@media (max-width: 860px) { .doors { grid-template-columns: 1fr; } }
+.door {
+  border: 1px solid var(--rule); border-radius: 14px;
+  padding: 28px; background: var(--paper-edge);
+}
+.door h3 { font-family: var(--display); font-size: 1.25rem; margin: 0 0 10px; font-weight: 700; }
+.door p { color: var(--ink-soft); margin: 0 0 18px; font-size: 0.92rem; }
+.door code, .snippet {
+  font-family: var(--mono); font-size: 0.78rem;
+}
+.snippet {
+  display: block; background: #1A1712; color: #D8CFBB;
+  border-radius: 10px; padding: 14px 16px; overflow-x: auto;
+  white-space: pre; margin: 0 0 14px;
+}
+.btn {
+  display: inline-block; font-family: var(--body); font-weight: 500;
+  background: var(--ink); color: var(--paper);
+  border: 0; border-radius: 10px; padding: 11px 20px;
+  font-size: 0.92rem; cursor: pointer; text-decoration: none;
+  transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+}
+.btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
+
+footer {
+  margin-top: 88px; padding-top: 28px; border-top: 1px solid var(--rule);
+  color: var(--ink-soft); font-size: 0.82rem;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+footer .filing { flex-basis: 100%; font-family: var(--mono); font-size: 0.72rem; opacity: 0.85; }
+footer .filing a { color: inherit; text-underline-offset: 3px; }
+
+
+/* 唯一签名运动：双译本同步高亮（右栏行滑入亮），非全站同构入场 */
+@media (prefers-reduced-motion: reduce) {
+  .btn, .record .line.hl { transition: none; }
+}

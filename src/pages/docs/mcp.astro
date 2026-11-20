@@ -1,0 +1,92 @@
+---
+// 门 B 落地页：匿名只读 MCP 的接入契约（全部为已上产真验事实，#2 change）。
+import Layout from "../../layouts/layout.astro";
+const ENDPOINT = "https://qicai.finddatatech.cloud/api/mcp";
+---
+
+<Layout title="启材 · MCP 接入契约">
+  <main>
+    <section class="hero" style="padding-bottom:8px">
+      <h1>MCP 接入契约</h1>
+      <p class="lede">匿名只读面，streamable-http。三只读工具；写面与实时论文层在凭证层。</p>
+    </section>
+
+    <style>
+      .doc { max-width: 860px; }
+      .doc h2 { font-family: var(--display); font-size: 1.2rem; margin: 40px 0 12px; }
+      .doc p, .doc li { color: var(--ink); font-size: 0.95rem; }
+      .doc ul { padding-left: 1.3em; }
+      table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin-top: 10px; }
+      th, td { text-align: left; border-bottom: 1px solid var(--rule); padding: 8px 10px; vertical-align: top; }
+      th { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-soft); }
+      .snippet { margin-top: 14px; }
+    </style>
+
+    <div class="doc">
+      <h2>端点</h2>
+      <pre class="snippet">{`POST ${ENDPOINT}
+content-type: application/json
+accept: application/json, text/event-stream`}</pre>
+      <p>协议版本 <code>2025-03-26</code>；无鉴权（匿名只读）。CORS 全开（<code>*</code>），浏览器与服务器端均可直连。</p>
+
+      <h2>工具面（三只读）</h2>
+      <table>
+        <tr><th>工具</th><th>作用</th><th>关键返回字段</th></tr>
+        <tr>
+          <td><code>edu_search</code></td>
+          <td>跨书籍/课程/论文/播客/卡片检索（公开面=本地目录）</td>
+          <td><code>items[].license_layer · commercial_ok · source_url · as_of</code></td>
+        </tr>
+        <tr>
+          <td><code>edu_item_detail</code></td>
+          <td>单条详情；撤回/合并条目返回标记态与重定向</td>
+          <td><code>item · card_boundary · marked_state</code></td>
+        </tr>
+        <tr>
+          <td><code>edu_overview</code></td>
+          <td>目录概况：许可层分布、逐通道健康、as_of</td>
+          <td><code>published_by_license_layer · by_channel · as_of</code></td>
+        </tr>
+      </table>
+      <p style="margin-top:10px;color:var(--ink-soft)">
+        写面（<code>edu_subscribe</code> / <code>edu_unsubscribe</code>）与 OpenAlex 实时论文层
+        <b>不在本端点</b>——订阅结构上不可达，非「返回错误」，是工具列表里就没有。
+      </p>
+
+      <h2>许可层词表</h2>
+      <table>
+        <tr><th>层</th><th>含义</th><th>商用</th></tr>
+        <tr><td><code>cc0_pd</code></td><td>CC0 / 公版</td><td>可</td></tr>
+        <tr><td><code>oa_cc_by</code></td><td>开放获取 CC BY 系</td><td>可（注明作者）</td></tr>
+        <tr><td><code>cc-by-nc</code></td><td>CC BY-NC 系（含 -nd / -sa）</td><td><b>禁</b></td></tr>
+        <tr><td><code>metadata_only</code></td><td>只收元数据，正文在原站且授权未判</td><td><b>禁</b>（宁限不放）</td></tr>
+        <tr><td><code>public-enclosure</code></td><td>公开音频轨（播客），无文字稿</td><td>按原站</td></tr>
+      </table>
+
+      <h2>故障语义</h2>
+      <p>所有工具返回带 <code>status</code>；通道故障时 <code>status</code> 为显式原因
+      （<code>no_match</code> / <code>not_indexed</code> / <code>unauthorized</code> /
+      <code>upstream_unreachable</code> / <code>timeout</code>），并带 <code>as_of</code>。
+      实时通道故障回落本地时，回落事实出现在 <code>live_channel</code> 字段——降级可见，不伪装。</p>
+
+      <h2>最小复现（curl）</h2>
+      <pre class="snippet">{`# initialize → 拿 mcp-session-id
+curl -si -X POST ${ENDPOINT} \\
+  -H 'content-type: application/json' \\
+  -H 'accept: application/json, text/event-stream' \\
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":
+       {"protocolVersion":"2025-03-26","capabilities":{},
+        "clientInfo":{"name":"curl","version":"0"}}}'
+
+# tools/call（带会话头）
+curl -s -X POST ${ENDPOINT} \\
+  -H 'content-type: application/json' \\
+  -H 'accept: application/json, text/event-stream' \\
+  -H 'mcp-session-id: <SID>' \\
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":
+       {"name":"edu_overview","arguments":{}}}'`}</pre>
+
+      <p style="margin-top:36px"><a class="btn ghost" href="/">← 回首页</a></p>
+    </div>
+  </main>
+</Layout>

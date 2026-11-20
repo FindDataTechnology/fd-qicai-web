@@ -1,0 +1,299 @@
+---
+// 启材线官网首屏（Persuade 单页）。
+// 双译本承重墙：左=人读编目卡，右=同一响应的真·MCP JSON（浏览器直连 #2 匿名只读端点）。
+// 红线（PRODUCT.md 约束）：右栏与概况带 MUST 来自实时调用；故障如实报因，不回退硬编数。
+// 左卡 SSR 静态样例 = 2026-11-04 实查真条目（edu.book.gutenberg.852），水合后被同一查询的
+// 实时响应替换；端点故障时左卡保留并挂「未实时确认」标记。
+import Layout from "../layouts/layout.astro";
+
+const EXAMPLE = {
+  resource_id: "edu.book.gutenberg.852",
+  title: "Democracy and Education: An Introduction to the Philosophy of Education",
+  resource_type: "book",
+  platform: "Project Gutenberg",
+  license: "public domain",
+  license_layer: "cc0_pd",
+  commercial_ok: true,
+  body_state: "link_only",
+  as_of: "2026-11-04T12:59:07.033437+00:00",
+  source_url: "https://www.gutenberg.org/ebooks/852.html.images",
+};
+const ENDPOINT = "https://qicai.finddatatech.cloud/api/mcp";
+---
+
+<Layout>
+  <main>
+    <section class="hero">
+      <h1>启材是一本判过许可的目录，<br />人和智能体读同一本。</h1>
+      <p class="lede">
+        课程、公版书、开放论文、中文播客——每一条都带许可层、可回访的来源、采集时间。
+        判不清的宁可标禁商用，不自夸齐全，也不装看不见短板。
+      </p>
+    </section>
+
+    <!-- ── 双译本承重墙 ── -->
+    <section class="dual" aria-label="同一条素材的两个读者">
+      <div>
+        <div class="panel-label">人读 · 编目卡</div>
+        <article class="card" id="card">
+          <span class="tab" data-layer={EXAMPLE.license_layer}></span>
+          <h2 class="title" data-field="title">{EXAMPLE.title}</h2>
+          <p class="creator" data-field="platform">{EXAMPLE.platform}</p>
+          <dl>
+            <dt>编号</dt><dd data-field="resource_id">{EXAMPLE.resource_id}</dd>
+            <dt>类型</dt><dd data-field="resource_type">书籍 · 公版</dd>
+            <dt>许可</dt>
+            <dd data-field="license_layer">
+              <span class="lic" style="--sw:var(--lic-cc0)">CC0 / 公版（cc0_pd）</span>
+            </dd>
+            <dt>商用</dt><dd data-field="commercial_ok">允许（commercial_ok: true）</dd>
+            <dt>正文</dt><dd data-field="body_state">正文在原站，本目录只收卡（link_only）</dd>
+            <dt>出处</dt>
+            <dd data-field="source_url"><a href={EXAMPLE.source_url} rel="noopener">{EXAMPLE.source_url}</a></dd>
+            <dt>采集</dt><dd data-field="as_of">{EXAMPLE.as_of}</dd>
+          </dl>
+        </article>
+        <p class="status" id="card-note" style="display:none"></p>
+      </div>
+      <div>
+        <div class="panel-label">机器读 · 真 MCP 响应（tools/call → edu_search）</div>
+        <div class="record" id="record" aria-live="polite">
+          <pre><span class="status">正在连接公开端点…</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 实时概况带 ── -->
+    <section class="overview" aria-label="目录实时概况">
+      <h2>目录现在有多少</h2>
+      <p class="asof" id="asof">数字取自实时 edu_overview，非本页硬编。</p>
+      <div id="stats"><p class="status">正在读取实时概况…</p></div>
+    </section>
+
+    <!-- ── 两扇门 ── -->
+    <section class="doors" aria-label="两条行动路径">
+      <div class="door">
+        <h3>门 A · 查一下（学生 / 老师）</h3>
+        <p>直接试公开检索面：结果和首屏那张卡同源，许可与出处逐条在场。</p>
+        <form id="search-form">
+          <input id="search-q" type="search" placeholder="例如：微积分、calculus、democracy"
+                 aria-label="检索词"
+                 style="width:100%;font-family:var(--body);font-size:0.95rem;padding:11px 14px;border:1px solid var(--rule);border-radius:10px;background:var(--paper);color:var(--ink);margin-bottom:12px" />
+          <button class="btn" type="submit">检索</button>
+        </form>
+        <div id="search-results" style="margin-top:18px"></div>
+      </div>
+      <div class="door">
+        <h3>门 B · 接入端点（智能体 / 开发者）</h3>
+        <p>匿名只读 MCP（streamable-http），三只读工具；订阅与实时论文层走凭证面。</p>
+        <pre class="snippet">{`{
+  "mcpServers": {
+    "qicai-edu": {
+      "type": "streamable-http",
+      "url": "${ENDPOINT}"
+    }
+  }
+}`}</pre>
+        <p style="margin:0 0 14px">
+          <code>edu_search</code> · <code>edu_item_detail</code> · <code>edu_overview</code>
+          —— 返回逐条带 <code>license_layer</code> / <code>commercial_ok</code> /
+          <code>source_url</code> / <code>as_of</code>。
+        </p>
+        <a class="btn ghost" href="/docs/mcp/">接入文档与契约</a>
+      </div>
+    </section>
+
+    <footer>
+      <span>启材 · 寻数旗下教育线 —— 不灌输知识，让人和智能体找到当下需要的素材。</span>
+      <span>qicai.finddatatech.cloud</span>
+      <span class="filing">
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">粤ICP备2026118740号-1</a> ·
+        <a href="https://beian.mps.gov.cn/#/query/webSearch?code=44030002016558" target="_blank" rel="noopener noreferrer">粤公网安备44030002016558号</a>
+      </span>
+    </footer>
+  </main>
+
+  <script>
+    import { McpClient } from "../lib/mcp-client.js";
+
+    const LAYERS = {
+      cc0_pd: { label: "CC0 / 公版", sw: "var(--lic-cc0)" },
+      oa_cc_by: { label: "CC BY（OA）", sw: "var(--lic-ccby)" },
+      "cc-by-nc": { label: "CC BY-NC 系", sw: "var(--lic-nc)" },
+      metadata_only: { label: "仅元数据", sw: "var(--lic-meta)" },
+      "public-enclosure": { label: "公开音频轨", sw: "var(--lic-audio)" },
+    };
+    // 目录里部分行 license_layer 存的是原始许可串——前端归一（与 classify_license 同口径）
+    function normLayer(l) {
+      const s = String(l || "").toLowerCase().replace(/\s+/g, "-");
+      if (s === "cc0" || s === "public-domain" || s === "cc0_pd") return "cc0_pd";
+      if (s === "cc-by" || s === "cc-by-sa" || s === "oa-cc-by") return "oa_cc_by";
+      if (s.startsWith("cc-by-nc")) return "cc-by-nc";
+      if (s === "metadata-only" || s === "metadata_only") return "metadata_only";
+      if (s === "public-enclosure") return "public-enclosure";
+      return "metadata_only";
+    }
+    const TYPE_CN = { book: "书籍", course: "课程", paper: "论文", podcast: "播客", card: "卡片" };
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+    // ── 左卡渲染（与右栏同源） ──
+    function renderCard(item) {
+      const layer = normLayer(item.license_layer || item.license);
+      const L = LAYERS[layer];
+      const comm = item.commercial_ok;
+      const el = $("card");
+      el.innerHTML = `
+        <span class="tab" data-layer="${layer}"></span>
+        <h2 class="title" data-field="title">${esc(item.title || "（无题）")}</h2>
+        <p class="creator" data-field="platform">${esc(item.platform || "")}</p>
+        <dl>
+          <dt>编号</dt><dd data-field="resource_id">${esc(String(item.resource_id ?? "—"))}</dd>
+          <dt>类型</dt><dd data-field="resource_type">${TYPE_CN[item.resource_type] || esc(item.resource_type || "—")}</dd>
+          <dt>许可</dt><dd data-field="license_layer"><span class="lic" style="--sw:${L.sw}">${L.label}（${esc(item.license || layer)}）</span></dd>
+          <dt>商用</dt><dd data-field="commercial_ok">${comm ? "允许（commercial_ok: true）" : "禁止（commercial_ok: false）"}</dd>
+          <dt>正文</dt><dd data-field="body_state">${item.body_state === "link_only" ? "正文在原站，本目录只收卡（link_only）" : esc(item.body_state || "—")}</dd>
+          <dt>出处</dt><dd data-field="source_url">${item.source_url ? `<a href="${esc(item.source_url)}" rel="noopener">${esc(item.source_url)}</a>` : "—"}</dd>
+          <dt>采集</dt><dd data-field="as_of">${esc(item.as_of || "—")}</dd>
+        </dl>
+        ${comm ? "" : '<span class="seal">禁商用</span>'}`;
+    }
+
+    // ── 右栏：真响应逐行渲染，行可被左卡字段点亮 ──
+    function renderRecord(envelope) {
+      const text = JSON.stringify(envelope, null, 1);
+      const lines = text.split("\n").map((ln) => {
+        const m = ln.match(/^\s*"([a-z_]+)":/i);
+        const key = m ? m[1] : "";
+        let html = esc(ln);
+        html = html
+          .replace(/(&quot;|")([a-z_]+)(&quot;|"):/gi, '<span class="k">"$2"</span>:')
+          .replace(/: ("(?:[^"\\]|\\.)*")/g, ': <span class="s">$1</span>')
+          .replace(/: (true|false)/g, ': <span class="b">$1</span>')
+          .replace(/: (\d[\d.]*)/g, ': <span class="n">$1</span>');
+        return `<span class="line" data-key="${key}">${html}</span>`;
+      });
+      $("record").innerHTML = `<pre>${lines.join("\n")}</pre>`;
+    }
+
+    // 点卡上字段 → 右栏对应行亮（本站唯一签名运动）
+    $("card").addEventListener("click", (e) => {
+      const f = e.target.closest("[data-field]");
+      if (!f) return;
+      document.querySelectorAll("[data-field].active").forEach((n) => n.classList.remove("active"));
+      document.querySelectorAll(".line.hl").forEach((n) => n.classList.remove("hl"));
+      f.classList.add("active");
+      const key = f.getAttribute("data-field");
+      document.querySelectorAll(`.line[data-key="${key}"]`).forEach((ln) => {
+        ln.classList.add("hl");
+        ln.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      });
+    });
+
+    // ── 实时概况带 ──
+    function renderOverview(t) {
+      const byLayer = t.published_by_license_layer || {};
+      const agg = {};
+      for (const [k, v] of Object.entries(byLayer)) {
+        const l = normLayer(k);
+        agg[l] = (agg[l] || 0) + v;
+      }
+      const total = t.catalog?.total_ingested ?? Object.values(byLayer).reduce((a, b) => a + b, 0);
+      const channels = Object.keys(t.by_channel || {}).length;
+      const chips = Object.entries(agg)
+        .sort((a, b) => b[1] - a[1])
+        .map(([l, n]) => {
+          const L = LAYERS[l];
+          return `<span class="stat"><i class="lic" style="--sw:${L.sw}"></i>${L.label} <b>${n}</b></span>`;
+        })
+        .join("");
+      $("stats").innerHTML =
+        `<span class="stat">已发布 <b>${total}</b> 条</span>` +
+        `<span class="stat">来源通道 <b>${channels}</b></span>` + chips;
+      $("asof").textContent = `as_of ${t.as_of} · 取自实时 edu_overview，非本页硬编`;
+    }
+
+    function fail(where, err) {
+      const note = $("card-note");
+      if (where === "hero") {
+        note.style.display = "block";
+        note.className = "status error";
+        note.textContent = `端点未响应，左卡为 2026-11-04 实查样例、未获实时确认：${err.message}`;
+        $("record").innerHTML = `<pre><span class="status error">连接公开端点失败：${esc(err.message)}
+（本页不摆拍：右栏只放真响应，失败就报因。）</span></pre>`;
+      } else {
+        $("stats").innerHTML = `<p class="status error">实时概况读取失败：${esc(err.message)}</p>`;
+      }
+    }
+
+    // ── 门 A：真检索演示 ──
+    $("search-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const q = $("search-q").value.trim();
+      const box = $("search-results");
+      if (!q) return;
+      box.innerHTML = '<p class="status">检索中…</p>';
+      try {
+        const client = window.__qicaiClient || (window.__qicaiClient = new McpClient());
+        if (!client.sessionId) await client.initialize();
+        const t = await client.callTool("edu_search", { query: q, limit: 4 });
+        if (t.status !== "ok" || !t.items?.length) {
+          const why = t.live_channel ? `（实时通道：${t.live_channel.reason}）` : "";
+          const n = t.catalog_size ?? t.catalog?.total_ingested ?? "?";
+          let zhNote = "";
+          if (t.query_translated) {
+            zhNote = `已按「${t.query_translated.from} → ${t.query_translated.to}」对照检索，仍未命中——目录暂无此主题。`;
+          } else if (/[^ -~]/.test(q)) {
+            zhNote = "该查询未能解析为英文主题词（学科词表/百科对照未覆盖）——试试英文关键词，或学科词如 微积分、机器学习。";
+          }
+          box.innerHTML = `<p class="status">目录中暂无匹配（已检索 ${n} 条，as_of ${t.as_of}）。${zhNote}${why}</p>`;
+          return;
+        }
+        const note = t.query_translated
+          ? `<p class="status">已按中英对照检索：${esc(t.query_translated.from)} → ${esc(t.query_translated.to)}</p>`
+          : "";
+        box.innerHTML = note + t.items.map((it) => {
+          const layer = normLayer(it.license_layer || it.license);
+          const L = LAYERS[layer];
+          return `<div class="card" style="margin-bottom:12px;padding:16px 18px">
+            <span class="tab" data-layer="${layer}"></span>
+            <div class="lic" style="--sw:${L.sw};margin-bottom:6px">${L.label}</div>
+            <div class="title" style="font-size:1.02rem;margin:0 0 4px">${esc(it.title || "（无题）")}</div>
+            <p class="creator" style="margin:0;font-size:0.82rem">${esc(it.platform || "")} · ${TYPE_CN[it.resource_type] || it.resource_type} · ${it.commercial_ok ? "可商用" : "禁商用"}</p>
+            ${it.commercial_ok ? "" : '<span class="seal" style="right:10px;bottom:8px;font-size:0.72rem;padding:2px 7px">禁商用</span>'}
+          </div>`;
+        }).join("");
+      } catch (err) {
+        box.innerHTML = `<p class="status error">检索失败：${esc(err.message)}</p>`;
+      }
+    });
+
+    // ── 水合：首屏双译本 + 概况，全部走真调用 ──
+    (async () => {
+      const client = new McpClient();
+      try {
+        await client.initialize();
+        window.__qicaiClient = client;
+        const t = await client.callTool("edu_search", { query: "Democracy and Education", limit: 1 });
+        const item = t.items?.[0];
+        if (item) {
+          renderCard(item);
+          renderRecord(t);
+        } else {
+          renderRecord(t);
+          fail("hero", { message: "查询无命中（目录可能已更新）" });
+        }
+      } catch (err) {
+        fail("hero", err);
+      }
+      try {
+        const c = window.__qicaiClient;
+        if (!c) throw new Error("端点未连接（首屏 initialize 已失败）");
+        renderOverview(await c.callTool("edu_overview", {}));
+      } catch (err) {
+        fail("overview", err);
+      }
+    })();
+  </script>
+</Layout>
