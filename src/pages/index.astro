@@ -26,7 +26,7 @@ const ENDPOINT = "https://qicai.finddatatech.cloud/api/mcp";
     <section class="hero">
       <h1>启材是一本判过许可的目录，<br />人和智能体读同一本。</h1>
       <p class="lede">
-        课程、公版书、开放论文、中文播客——每一条都带许可层、可回访的来源、采集时间。
+        课程、公版书、开放论文、播客——每一条都带许可层、可回访的来源、采集时间。
         判不清的宁可标禁商用，不自夸齐全，也不装看不见短板。
       </p>
     </section>
@@ -200,7 +200,24 @@ const ENDPOINT = "https://qicai.finddatatech.cloud/api/mcp";
         agg[l] = (agg[l] || 0) + v;
       }
       const total = t.catalog?.total_ingested ?? Object.values(byLayer).reduce((a, b) => a + b, 0);
-      const channels = Object.keys(t.by_channel || {}).length;
+      const byChannel = t.by_channel || {};
+      const channels = Object.keys(byChannel).length;
+      // 集中度：最大通道占比（据实披露，不以「通道数」暗示广度）
+      let topCh = "", topCnt = 0;
+      for (const [ch, h] of Object.entries(byChannel)) {
+        if ((h.count || 0) > topCnt) { topCnt = h.count || 0; topCh = ch; }
+      }
+      const topShare = total > 0 ? Math.round((topCnt / total) * 100) : 0;
+      // 逐通道新鲜度：求最旧通道的 latest_as_of + 陈旧判定（>7 天未推进）
+      const STALE_MS = 7 * 24 * 3600 * 1000;
+      const now = Date.now();
+      let oldest = null, oldestCh = "";
+      for (const [ch, h] of Object.entries(byChannel)) {
+        const ts = h.latest_as_of ? Date.parse(h.latest_as_of) : null;
+        if (ts && (oldest === null || ts < oldest)) { oldest = ts; oldestCh = ch; }
+      }
+      const stale = oldest !== null && (now - oldest) > STALE_MS;
+      const oldestDays = oldest !== null ? Math.floor((now - oldest) / 86400000) : null;
       const chips = Object.entries(agg)
         .sort((a, b) => b[1] - a[1])
         .map(([l, n]) => {
@@ -210,8 +227,14 @@ const ENDPOINT = "https://qicai.finddatatech.cloud/api/mcp";
         .join("");
       $("stats").innerHTML =
         `<span class="stat">已发布 <b>${total}</b> 条</span>` +
-        `<span class="stat">来源通道 <b>${channels}</b></span>` + chips;
-      $("asof").textContent = `as_of ${t.as_of} · 取自实时 edu_overview，非本页硬编`;
+        `<span class="stat">来源通道 <b>${channels}</b>${topCh ? `（${topCh} 占 ${topShare}%）` : ""}</span>` +
+        (oldest !== null
+          ? `<span class="stat${stale ? " stale" : ""}">最近采集 <b>${new Date(oldest).toISOString().slice(0, 10)}</b>`
+            + `${stale ? `（${oldestCh} 已 ${oldestDays} 天未推进）` : ""}</span>`
+          : "") +
+        chips;
+      $("asof").textContent = `as_of ${t.as_of} · 取自实时 edu_overview，非本页硬编`
+        + (stale ? ` · ⚠ 目录底料陈旧（最旧通道停在 ${new Date(oldest).toISOString().slice(0, 10)}）` : "");
     }
 
     function fail(where, err) {
